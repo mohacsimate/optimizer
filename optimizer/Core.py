@@ -477,7 +477,6 @@ class coreModul():
 			self.cands=self.optimizer.final_pop[0]
 			self.fits=self.optimizer.final_pop[1]
 			self.optimizer.final_pop = []
-			print("WEIGHT")
 			#print(self.option_handler.weights*self.data_handler.number_of_traces())
 			#for gen in self.fits:
 
