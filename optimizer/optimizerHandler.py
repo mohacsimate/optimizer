@@ -1719,7 +1719,7 @@ class deapNSGA(oldBaseOptimizer):
 			#self.finap_pop.birthdate.append((birth-len(pop)+i))
 		self.final_pop.append(poparray2) #]append([poparray2 , finalfitness[i] , (birth-len(pop)+i)])
 		self.final_pop.append(finalfits)
-    self.stat_file.write(self.logbook.__str__())
+		self.stat_file.write(self.logbook.__str__())
 
 		
 		#<Individual: candidate = [0.07722800626371065, 0.2423814486289446, 0.5850818875172326, 0.889195037637904],>

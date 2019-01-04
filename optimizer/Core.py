@@ -460,10 +460,10 @@ class coreModul():
 			self.optimizer=NES(self.data_handler,self.model_handler,self.option_handler)
 			self.brain_var = True
 		
-		f_handler=open(self.option_handler.GetFileOption()+"/"+self.option_handler.GetFileOption().split("/")[-1]+"_settings.xml", 'w')
+		"""f_handler=open(self.option_handler.GetFileOption()+"/"+self.option_handler.GetFileOption().split("/")[-1]+"_settings.xml", 'w')
 		#print self.option_handler.dump(self.ffun_mapper)
 		f_handler.write(self.option_handler.dump(self.ffun_mapper))
-		f_handler.close()
+		f_handler.close()"""
 
 		start_time=time.time()
 		self.optimizer.Optimize()
