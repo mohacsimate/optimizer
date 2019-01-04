@@ -2,10 +2,9 @@ import wx
 import sys
 from traceHandler import sizeError
 try:
-    import matplotlib
-    matplotlib.use('WXAgg')
-    from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-    from matplotlib.figure import Figure
+	import matplotlib.pyplot as plt
+	from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+	from matplotlib.figure import Figure
 except RuntimeError as re:
     print(re)
     sys.exit()
@@ -18,7 +17,7 @@ import os
 from copy import copy
 import Core
 import numpy
-
+import os.path
 
 from deap.benchmarks.tools import diversity, convergence, hypervolume
 from deap import tools
@@ -31,7 +30,6 @@ from PyQt5.QtGui import *
 import os
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
 
 def popup(message):
     """
@@ -180,8 +178,10 @@ class Ui_Optimizer(object):
         self.tabwidget.addTab(self.filetab, "")
         self.modeltab = QtWidgets.QWidget()
         self.modeltab.setObjectName("modeltab")
+        self.load_mods_checkbox = QtWidgets.QCheckBox(self.modeltab)
+        self.load_mods_checkbox.setGeometry(QtCore.QRect(10, 130, 20, 20))
         self.label_23 = QtWidgets.QLabel(self.modeltab)
-        self.label_23.setGeometry(QtCore.QRect(10, 130, 121, 16))
+        self.label_23.setGeometry(QtCore.QRect(30, 130, 121, 16))
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         font.setPointSize(10)
@@ -203,7 +203,6 @@ class Ui_Optimizer(object):
         self.pushButton_13.setObjectName("pushButton_13")
         self.lineEdit_file2 = QtWidgets.QLineEdit(self.modeltab)
         self.lineEdit_file2.setGeometry(QtCore.QRect(10, 100, 221, 22))
-        self.lineEdit_file2.setText("")
         self.lineEdit_file2.setObjectName("lineEdit_file2")
         self.modellist = QtWidgets.QTableWidget(self.modeltab)
         self.modellist.setGeometry(QtCore.QRect(10, 200, 441, 261))
@@ -252,7 +251,6 @@ class Ui_Optimizer(object):
         self.dd_type.currentIndexChanged.connect(self.sim_plat)
         self.lineEdit_folder2 = QtWidgets.QLineEdit(self.modeltab)
         self.lineEdit_folder2.setGeometry(QtCore.QRect(10, 150, 221, 22))
-        self.lineEdit_folder2.setText("")
         self.lineEdit_folder2.setObjectName("lineEdit_folder2")
         self.sim_path = QtWidgets.QLineEdit(self.modeltab)
         self.sim_path.setGeometry(QtCore.QRect(360, 150, 241, 22))
@@ -273,9 +271,9 @@ class Ui_Optimizer(object):
         self.tabwidget.addTab(self.modeltab, "")
         self.simtab = QtWidgets.QWidget()
         self.simtab.setObjectName("simtab")
-        self.spinBox_15 = QtWidgets.QComboBox((self.simtab))
-        self.spinBox_15.setGeometry(QtCore.QRect(220, 100, 121, 23))
-        self.spinBox_15.setObjectName("parameter to record")
+        self.param_to_record = QtWidgets.QComboBox((self.simtab))
+        self.param_to_record.setGeometry(QtCore.QRect(220, 100, 121, 23))
+        self.param_to_record.setObjectName("parameter to record")
         self.label_44 = QtWidgets.QLabel(self.simtab)
         self.label_44.setGeometry(QtCore.QRect(10, 220, 111, 16))
         font = QtGui.QFont()
@@ -315,9 +313,9 @@ class Ui_Optimizer(object):
         self.lineEdit_pos = QtWidgets.QLineEdit(self.simtab)
         self.lineEdit_pos.setGeometry(QtCore.QRect(220, 200, 113, 22))
         self.lineEdit_pos.setObjectName("position")
-        self.spinBox_9 = QtWidgets.QComboBox(self.simtab)
-        self.spinBox_9.setGeometry(QtCore.QRect(10, 340, 121, 23))
-        self.spinBox_9.setObjectName("section dur")
+        self.section_dur = QtWidgets.QComboBox(self.simtab)
+        self.section_dur.setGeometry(QtCore.QRect(10, 340, 121, 23))
+        self.section_dur.setObjectName("section dur")
         self.label_46 = QtWidgets.QLabel(self.simtab)
         self.label_46.setGeometry(QtCore.QRect(10, 270, 111, 16))
         font = QtGui.QFont()
@@ -330,9 +328,9 @@ class Ui_Optimizer(object):
         self.stimprot = QtWidgets.QComboBox(self.simtab)
         self.stimprot.setGeometry(QtCore.QRect(10, 100, 121, 23))
         self.stimprot.setObjectName("stimprot")
-        self.spinBox_11 = QtWidgets.QComboBox(self.simtab)
-        self.spinBox_11.setGeometry(QtCore.QRect(10, 150, 121, 23))
-        self.spinBox_11.setObjectName("stimulus type")
+        self.stimulus_type = QtWidgets.QComboBox(self.simtab)
+        self.stimulus_type.setGeometry(QtCore.QRect(10, 150, 121, 23))
+        self.stimulus_type.setObjectName("stimulus type")
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         font.setPointSize(10)
@@ -423,9 +421,9 @@ class Ui_Optimizer(object):
         self.lineEdit_dt = QtWidgets.QLineEdit(self.simtab)
         self.lineEdit_dt.setGeometry(QtCore.QRect(220, 380, 113, 22))
         self.lineEdit_dt.setObjectName("lineEdit_dt")
-        self.spinBox_16 = QtWidgets.QComboBox(self.simtab)
-        self.spinBox_16.setGeometry(QtCore.QRect(220, 150, 121, 23))
-        self.spinBox_16.setObjectName("section")
+        self.section_box = QtWidgets.QComboBox(self.simtab)
+        self.section_box.setGeometry(QtCore.QRect(220, 150, 121, 23))
+        self.section_box.setObjectName("section")
         self.lineEdit_initv = QtWidgets.QLineEdit(self.simtab)
         self.lineEdit_initv.setGeometry(QtCore.QRect(220, 280, 113, 22))
         self.lineEdit_initv.setObjectName("initv")
@@ -617,8 +615,11 @@ class Ui_Optimizer(object):
         #self.tabwidget.currentChanged.connect(self.onChange)
         #modeltab 1
         self.tabwidget.setTabText(self.tabwidget.indexOf(self.filetab), _translate("Optimizer", "File Tab"))
-        self.label_23.setText(_translate("Optimizer", "Special File location"))
+        self.label_23.setText(_translate("Optimizer", "Load mod files from:"))
         self.label_24.setText(_translate("Optimizer", "Model File"))
+        self.lineEdit_folder2.setEnabled(False)
+        self.pushButton_14.setEnabled(False)
+        self.load_mods_checkbox.clicked.connect(self.disable_mod_path)
         self.pushButton_13.setText(_translate("Optimizer", "Load"))
         self.pushButton_13.clicked.connect(self.Load2)
         self.pushButton_14.setText(_translate("Optimizer", "Browse..."))
@@ -710,8 +711,8 @@ class Ui_Optimizer(object):
         self.lineEdit_dt.setText("0.05")
         
         self.stimprot.addItems(["IClamp","VClamp"])
-        self.spinBox_11.addItems(["Step Protocol","Custom Waveform"])
-        self.spinBox_15.addItems(["v","i"])
+        self.stimulus_type.addItems(["Step Protocol","Custom Waveform"])
+        self.param_to_record.addItems(["v","i"])
         #self.stimprot.setItemText(0, _translate("Optimizer", "IClamp"))
         #self.stimprot.setItemText(1, _translate("Optimizer", "VClamp"))
 
@@ -749,9 +750,9 @@ class Ui_Optimizer(object):
         self.label_59.setText(_translate("Optimizer", "Algorithms"))
         self.label_60.setText(_translate("Optimizer", "Parameters"))
         self.tabwidget.setTabText(self.tabwidget.indexOf(self.runtab), _translate("Optimizer", "Run Tab"))
-        self.algolist.setColumnCount(3)
+        self.algolist.setColumnCount(2)
         self.algolist.horizontalHeader().setStretchLastSection(True)
-        self.algolist.setHorizontalHeaderLabels(["Algorithms","Package","Description"])
+        self.algolist.setHorizontalHeaderLabels(["Algorithms","Package"])
         self.algolist.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.algolist.setColumnWidth(0,200)
         self.algolist.clicked.connect(self.algoselect)
@@ -762,11 +763,14 @@ class Ui_Optimizer(object):
         self.aspectlist.cellChanged.connect(self.aspect_changed)
         self.seed=None
 
-        Inspyred=["Evolutionary Algorithm","Particle Swarm","Differential Evolution","Random Search","Nondominated Sorted(NSGAII)","Pareto Archived(PAES)","Simulated Annealing"]
+        Inspyred=["Evolutionary Algorithm (EA)","Particle Swarm (PSO)","Differential Evolution (DE)","Random Search",
+                "Nondominated Sorted (NSGAII)","Pareto Archived (PAES)","Simulated Annealing"]
         Scipy=["Basinhopping","Nelder-Mead","L-BFGS-B"]
-        DEAP=["Nondominated Sorted(NSGAII)","Strength Pareto(SPEA2)","Indicator Based(IBEA)"]
-        Pybrain=["Natural Evolution Strategies"]
-        Pygmo=["Differential Evolution","Self-adaptive DE","Particle Swarm"]
+        DEAP=["Nondominated Sorted (NSGAII)","Strength Pareto (SPEA2)","Indicator Based (IBEA)"]
+        Pybrain=["Natural Evolution Strategies (NES)"]
+        Pygmo=["Differential Evolution (DE)","Self-adaptive DE (SADE)","Particle Swarm (PSO)","Exponential Evolution Strategies (XNES)",
+                "Simple Genetic Algorithm (SGA)","Covariance Matrix Adaptation ES (CMAES)","Single Differential Evolution",
+                "Differential Evolution (DE1220)","Bee Colony","FullGrid"]
         algos={
             'Inspyred': Inspyred,
             'Scipy': Scipy,
@@ -806,30 +810,38 @@ class Ui_Optimizer(object):
 
 
         self.algo_dict={
-            "Evolutionary Algorithm - Inspyred": [descr19.copy(),descr20.copy(),descr21.copy(),descr40],
+            "Evolutionary Algorithm (EA) - Inspyred": [descr19.copy(),descr20.copy(),descr21.copy(),descr40],
             "Simulated Annealing - Inspyred": [descr20.copy(),descr21.copy(),descr22.copy(),descr23.copy(),descr24.copy(),descr26.copy(),descr40],
-            "Particle Swarm - Inspyred" : [descr19.copy(),descr20.copy(),descr34.copy(),descr35.copy(),descr36.copy(),descr40],
+            "Particle Swarm (PSO) - Inspyred" : [descr19.copy(),descr20.copy(),descr34.copy(),descr35.copy(),descr36.copy(),descr40],
             "Basinhopping - Scipy": [descr32.copy(),descr33.copy(),descr25.copy(),descr27.copy(),descr29],
             "Nelder-Mead - Scipy": [descr20.copy(),descr30.copy(),descr31],
             "L-BFGS-B - Scipy": [descr20.copy(),descr28],
-            "Differential Evolution - Inspyred": [descr19.copy(),descr20.copy(),descr21.copy(),descr39.copy(),descr40],
+            "Differential Evolution (DE) - Inspyred": [descr19.copy(),descr20.copy(),descr21.copy(),descr39.copy(),descr40],
             "Random Search - Inspyred": [descr19.copy(),descr40],
-            "Nondominated Sorted(NSGAII) - Inspyred": [descr19.copy(),descr20.copy(),descr21.copy(),descr40],
-            "Pareto Archived(PAES) - Inspyred": [descr19.copy(),descr20.copy(),descr40],
-            "Nondominated Sorted(NSGAII) - DEAP": [descr19.copy(),descr20.copy(),descr40],
-            "Strength Pareto(SPEA2) - DEAP": [descr19.copy(),descr20.copy(),descr40],
-            "Indicator Based(IBEA) - DEAP": [descr19.copy(),descr20.copy(),descr40],
-            "Natural Evolution Strategies - Pybrain": [descr19.copy(),descr20.copy(),descr40],
-            "Differential Evolution - Pygmo":[descr19.copy(),descr20.copy(),descr40],
-            "Self-adaptive DE - Pygmo":[descr19.copy(),descr20.copy(),descr40],
-            "Particle Swarm - Pygmo":[descr19.copy(),descr20.copy(),descr40]}
+            "Nondominated Sorted (NSGAII) - Inspyred": [descr19.copy(),descr20.copy(),descr21.copy(),descr40],
+            "Pareto Archived (PAES) - Inspyred": [descr19.copy(),descr20.copy(),descr40],
+            "Nondominated Sorted (NSGAII) - DEAP": [descr19.copy(),descr20.copy(),descr21.copy(),descr40],
+            "Strength Pareto (SPEA2) - DEAP": [descr19.copy(),descr20.copy(),descr21.copy(),descr40],
+            "Indicator Based (IBEA) - DEAP": [descr19.copy(),descr20.copy(),descr21.copy(),descr40],
+            "Natural Evolution Strategies (NES)- Pybrain": [descr19.copy(),descr20.copy(),descr40],
+            "Differential Evolution (DE) - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "Self-Adaptive DE (SADE) - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "Exponential Evolution Strategies (XNES) - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "Simple Genetic Algorithm (SGA) - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "Particle Swarm (PSO) - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "Covariance Matrix Adaptation ES (CMAES) - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "Single Differential Evolution - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "Differential Evolution (DE1220) - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "Bee Colony - Pygmo":[descr19.copy(),descr20.copy(),descr40],
+            "FullGrid - Pygmo":[descr19.copy(),descr20.copy(),descr40]
+            }
         
 
 
         self.tabwidget.setTabText(self.tabwidget.indexOf(self.eval_tab), _translate("Optimizer", "Evaluation Tab"))
         self.label_72.setText(_translate("Optimizer", "Final Result"))
         #plt.tight_layout()
-        self.figure2 = plt.figure(figsize=(4,2.5), dpi=130)
+        self.figure2 = plt.figure(figsize=(4,2), dpi=130)
         # self.figure2.gcf().subplots_adjust()
         self.canvas2 = FigureCanvas(self.figure2)
         self.canvas2.setParent(self.widget2)
@@ -905,6 +917,18 @@ class Ui_Optimizer(object):
         if folderName:
             self.lineEdit_folder.setText(folderName)
 
+    def disable_mod_path(self):
+        """
+        Disables mod files path if checked for usage
+        """
+        if self.load_mods_checkbox.isChecked():
+            self.lineEdit_folder2.setEnabled(True)
+            self.pushButton_14.setEnabled(True)
+        else:
+            self.lineEdit_folder2.setEnabled(False)
+            self.pushButton_14.setEnabled(False)
+
+
     def unitchange(self):
         """
         Sets units for drop down widget selecting simulation type.
@@ -958,7 +982,6 @@ class Ui_Optimizer(object):
                                    self.type_selector.currentText().split()[0].lower()]}
                 
             except ValueError as ve:
-                #wx.MessageBox('The input file or the type is missing. Please give them', 'Error', wx.OK | wx.ICON_ERROR)
                 print(ve)
 
         else:
@@ -974,7 +997,6 @@ class Ui_Optimizer(object):
                                    self.type_selector.currentText().split()[0].lower()]}
                 
             except ValueError as ve:
-                #wx.MessageBox('Some of the cells are empty. Please fill out all of them!', 'Error', wx.OK | wx.ICON_ERROR)
                 print(ve)
         self.core.FirstStep(kwargs)
         self.tabwidget.setTabEnabled(1,True)
@@ -1227,7 +1249,7 @@ class Ui_Optimizer(object):
             self.remover.setEnabled(True)
             self.modellist.setEnabled(True)
             self.lineEdit_file2.setEnabled(True)
-            self.lineEdit_folder2.setEnabled(True   )
+            self.lineEdit_folder2.setEnabled(True)
 
 
     def Load2(self, e):
@@ -1235,7 +1257,11 @@ class Ui_Optimizer(object):
         Load the selected Neuron model and displays the sections in a tablewidget
         """
         self.model_file = self.lineEdit_file2.text()
-        self.spec_file = self.lineEdit_folder2.text()
+        if self.load_mods_checkbox.isChecked():
+            self.spec_file = self.lineEdit_folder2.text()
+        else:
+            self.spec_file = None
+
         try:
             self.core.LoadModel({"model" : [self.model_file, self.spec_file],
                                  "simulator" : self.dd_type.currentText(),
@@ -1270,8 +1296,8 @@ class Ui_Optimizer(object):
         if not self.dd_type.currentIndex():  
             try:
                 tmp=self.core.ReturnSections()
-                self.spinBox_16.addItems(tmp)
-                self.spinBox_9.addItems(tmp)
+                self.section_box.addItems(tmp)
+                self.section_dur.addItems(tmp)
             except:
                 popup("Section error")
 
@@ -1394,16 +1420,25 @@ class Ui_Optimizer(object):
 
 
     def runsim(self): 
+        """
+        Check all the tabs and sends the options to the Core.
+        Check the fitness values and if they are normalized.
+        Check the selected algorithm and the options for it then launch the optimization.
+        Calls the last step if the optimization ended.
+        If an error happens, stores the number of tab in a list and it's error string in an other list.
+        Switch to the tab, where the error happened and popup the erro.
+        """
         err=[]
         errpop=[]
+
         if not self.dd_type.currentIndex():
             try:
-                self.core.SecondStep({"stim" : [str(self.stimprot.currentText()), float(self.lineEdit_pos.text()), str(self.spinBox_16.currentText())],
+                self.core.SecondStep({"stim" : [str(self.stimprot.currentText()), float(self.lineEdit_pos.text()), str(self.section_box.currentText())],
                                     "stimparam" : [self.SiW.container, float(self.lineEdit_delay.text()), float(self.lineEdit_duration.text())]})
                 self.kwargs = {"runparam":[float(self.lineEdit_tstop.text()),
                                         float(self.lineEdit_dt.text()),
-                                        str(self.spinBox_15.currentText()),
-                                        str(self.spinBox_9.currentText()),
+                                        str(self.param_to_record.currentText()),
+                                        str(self.section_dur.currentText()),
                                         float(self.lineEdit_posins.text()),
                                         float(self.lineEdit_initv.text())]}
             except AttributeError:
@@ -1444,7 +1479,7 @@ class Ui_Optimizer(object):
                 print(self.aspectlist.item(row,1).text())
             """
             selected_algo = self.algolist.selectionModel().selectedRows()
-            algo_name=str(self.algolist.item(selected_algo[0].row(), 0).text())
+            algo_name=str(self.algolist.item(selected_algo[0].row(), 0).text()+' - '+str(self.algolist.item(selected_algo[0].row(), 1).text()))
             tmp = {"seed" : int(self.aspectlist.item(0,1).text()),
                 "evo_strat" : str(algo_name)
                 }
@@ -1465,32 +1500,35 @@ class Ui_Optimizer(object):
             
         try:
             self.core.ThirdStep(self.kwargs)
-        #wx.MessageBox('Optimization finished. Press the Next button for the results!', 'Done', wx.OK | wx.ICON_EXCLAMATION)
             if self.core.option_handler.output_level=="1":
                 self.core.Print()
             self.seed = None
         except sizeError as sE:
             err.append(4)
             errpop.append("There was an error during the optimization: "+sE.m)
-        #except Exception as e:
-            #err.append(4)
-            #print(e)
-            #errpop.append("There was an error")
+        except Exception as e:
+            err.append(4)
+            print(e)
+            errpop.append("There was an error")
         if err:
             popup(errpop[0])
             self.tabwidget.setCurrentIndex(int(min(err)))
         else:
-            try:
-                self.core.FourthStep()
-                self.eval_tab_plot()
-                self.plot_tab_fun()
-                self.tabwidget.setCurrentIndex(5)
-            except:
-                popup("Forth step error")
+            #try:
+            self.core.FourthStep()
+            self.eval_tab_plot()
+            self.plot_tab_fun()
+            self.tabwidget.setCurrentIndex(5)
+            #except:
+            #   popup("Forth step error")
 
 
 
     def eval_tab_plot(self):
+        """
+        First writes out all the fitnesses for the parameters in a scrollable text area.
+        Plots the experimental and result traces, sets tight layout not to crop the sides.
+        """
         text = "Results:"
         #for n, k in zip(self.core.option_handler.GetObjTOOpt(), self.core.optimizer.fit_obj.ReNormalize(self.core.optimizer.final_pop[0].candidate[0:len(self.core.option_handler.adjusted_params)])):
         for n, k in zip(self.core.option_handler.GetObjTOOpt(), self.core.optimizer.fit_obj.ReNormalize(self.core.cands[0])):
@@ -1524,7 +1562,7 @@ class Ui_Optimizer(object):
 
         exp_data = []
         model_data = []
-        axes = self.figure2.add_subplot(111)
+        axes = self.figure2.add_subplot(1,1,1)
 
         if self.core.option_handler.type[-1]!="features":
             for n in range(self.core.data_handler.number_of_traces()):
@@ -1583,6 +1621,9 @@ class Ui_Optimizer(object):
             #param_save.Bind(wx.EVT_BUTTON,self.SaveParam)
         
     def SaveParam(self, e):
+        """
+        Saves the found values in a file.
+        """
         try:
             save_file_name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File')
             if save_file_name[0]:
@@ -1596,7 +1637,9 @@ class Ui_Optimizer(object):
 
 
     def plot_tab_fun(self):
-
+        """
+        Writes out the same fitnesses for parameters as in the previous tab.
+        """
         if self.core.moo_var:
             try:
                 #print(self.core.optimizer.logbook)
@@ -1653,9 +1696,13 @@ class Ui_Optimizer(object):
             self.errorlist.setItem(c_idx, 3, QTableWidgetItem(tmp[3]))
 
     def PlotGen(self, e):
-        import os.path
+        """
+        Generates the Generation plot for Inspired and Deap packages differently.
+        Deap plots generated by using regular expression on statistics file.
+        Inspyred plots generated by it's own function.
+        """
         plt.close('all')
-        if self.core.moo_var:
+        if self.core.deap_var:
             with open("stat_file.txt","r") as f:
                 textlines=""
                 for line in f:
@@ -1688,7 +1735,7 @@ class Ui_Optimizer(object):
         if os.path.getmtime("stat_file.txt") <= self.core.option_handler.start_time_stamp:
             popup('Generation plot is not available for this algorithm.')
         try:
-            if self.core.moo_var:
+            if self.core.deap_var:
                 genarr=[]
                 minarr=[]
                 maxarr=[]
@@ -1727,27 +1774,6 @@ class Ui_Optimizer(object):
                     label.set_linewidth(1.5)
                 plt.show()
             else:
-                """
-                import csv
-
-                with open('stat_file.txt', 'r') as in_file:
-                    stripped = (line.strip() for line in in_file)
-                    lines = (line.split(",") for line in stripped if line)
-                    with open('stat_file.csv', 'w') as out_file:
-                        writer = csv.writer(out_file)
-                        writer.writerows(lines)
-                with open("stat_file.txt","r+") as f:
-                    tempstr=''
-                    tmplines=f.readlines()
-                    for tmpstr in tmplines:
-                        print(tmpstr)
-                        #tmpstr.decode('utf-8')
-                        tempstr=tempstr+tmpstr+'/n'
-                    print(tempstr)
-                    f.seek(0)
-                    f.write(tempstr)
-                    f.truncate()
-                    """
                 generation_plot("stat_file.txt")
         except ValueError:
             stat_file=open("stat_file.txt","rt")

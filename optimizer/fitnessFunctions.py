@@ -14,6 +14,8 @@ import modelHandler
 import time
 import random
 
+import optimizerHandler as oH
+
 try:
     import copyreg
 except:
@@ -112,8 +114,9 @@ class fF(object):
         self.option = option_object
         self.reader = reader_object
         #self.current_pop=0
-        self.fun_dict = {"Combinations": self.combineFeatures}
-        self.fun_dict2 = {"Multiobj": self.MooFeatures}
+        self.fun_dict = {"Combinations": self.combineFeatures,
+                        "Multiobj": self.MooFeatures,
+                        "Deapwrapper": self.DEAP_wrapper}
         self.calc_dict = {"MSE": self.calc_ase,
                         "MSE (excl. spikes)": self.calc_spike_ase,
                         "Spike count": self.calc_spike,
@@ -1121,11 +1124,8 @@ class fF(object):
             the actual data traces.
         :return: the ``list`` of fitness values corresponding to the parameter sets
         """
-        print("MOOO CANDIDATES")
-        print(candidates)
         self.fitnes = []
         features = self.option.feats
-
         #print self.option.feats   #--> [<bound method fF.AP1_amp_abstr_data of <fitnessFunctions.fF instance at 0x7f669e957128>>] (ezt adja)
         weigths = self.option.weights
         temp_fit = []
@@ -1146,7 +1146,7 @@ class fF(object):
             if self.option.output_level == "1":
                 print(l)
             l = self.ReNormalize(l)
-
+            
             if self.option.output_level == "1":
                 print(l)
             for k in range(k_range):     #for k in range(self.reader.number_of_traces()):
@@ -1187,17 +1187,14 @@ class fF(object):
 
             if self.option.output_level == "1":
                 print("current fitness: ",temp_fit)
-            del temp_fit[:]         #remove list elements
-        '''
-        if(len(self.fitnes[0])==4):
-            print("WOLOLO")
-            self.fitnes = [ec.emo.Pareto((1,1,1,1,1,1,1,1,1,1,1,1))]
-        print("\nPARAMS: ", candidates)
-        print("FITNES: " ,self.fitnes)
-        print("LEN: ", len(self.fitnes[0]))
-        '''
-        print("Param and fit", candidates) 
-        print(self.fitnes)
+            del temp_fit[:]         #remove list element
         
         
         return self.fitnes
+
+    def DEAP_wrapper(self,candidates,args={}):
+        candidates=[candidates]
+        fitnesses=self.MooFeatures(candidates,args)
+        #with open("ibeafits.txt","a+") as f:
+        #    f.write(str(candidates[0])+":"+str(fitnesses[0])+"\n") 
+        return fitnesses[0]

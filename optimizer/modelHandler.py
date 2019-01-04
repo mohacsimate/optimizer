@@ -93,10 +93,10 @@ class modelHandlerNeuron():
 
         print('*********** NEURON LOADED ***********')
         self.base_directory=base
-        self.special=special_path
+        self.special= None if special_path == 'None' else special_path
         self.model=model_path
-  
-        neuron.load_mechanisms(self.special)
+        if self.special:
+            neuron.load_mechanisms(self.special)
         
         #os.chdir(self.special)
         #from neuron import h
@@ -114,7 +114,9 @@ class modelHandlerNeuron():
         #from neuron import h
         from neuron import h
         import neuron
-        neuron.load_mechanisms(self.special)
+        
+        if self.special:
+            neuron.load_mechanisms(self.special)
         self.hoc_obj=h
         self.hoc_obj.load_file(str(self.model))
         self.hoc_obj.load_file("stdrun.hoc")
@@ -446,6 +448,7 @@ class modelHandlerNeuron():
         Converts the hoc vector obtained from the simulation and converts it into a ``Trace`` object.
 
         :param vector: a hoc vector
+
 
         :return: the data trace from the created object
 
